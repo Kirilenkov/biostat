@@ -1,0 +1,121 @@
+# Импорты
+
+```{r}
+library(tidyverse)
+library(readxl)
+```
+
+# Загрузка сета данных
+
+```{r}
+pima <- read_excel(path = 'pima.xlsx')
+pima <- na.omit(pima)
+pima <- pima %>%
+    mutate_at(vars(diabetes), as.factor)
+```
+# 1.  Рассчитайте описательные статистики для переменных glucose, pressure, mass.
+
+
+# Описательные статистики
+
+```{r}
+# Расчет основных описательных статистик:
+glucose_summary <- summary(pima$glucose)
+pressure_summary <- summary(pima$pressure)
+mass_summary <- summary(pima$mass)
+
+# Расчет SD для каждой переменной:
+glucose_sd <- sd(pima$glucose, na.rm = TRUE)
+pressure_sd <- sd(pima$pressure, na.rm = TRUE)
+mass_sd <- sd(pima$mass, na.rm = TRUE)
+
+glucose_summary
+pressure_summary
+mass_summary
+
+glucose_sd
+pressure_sd
+mass_sd
+```
+
+# Рассчет частот для переменной diabetes.
+
+```{r}
+# Расчет абсолютных частот:
+absolute_frequencies <- table(pima$diabetes)
+
+# Расчет относительных частот:
+relative_frequencies <- prop.table(absolute_frequencies) * 100
+
+# Вывод результатов:
+absolute_frequencies
+relative_frequencies
+```
+
+# 2. Создание на основе переменной age новой переменной age_group, которая будет отражать следующие возрастные группы: 21–35, 36–49 и 50+. Рассчет описательной статистики для новой переменной.
+
+```{r}
+pima <- pima %>%
+  mutate(age_group = ifelse(age <= 35, "21-35",
+  ifelse(age <= 49, "36-49", "50+")))
+
+pima <- mutate(pima, age_group = as.factor(age_group))
+
+abs_age <- table(pima$age_group)
+rel_age <- (abs_age / length(pima$age_group)) * 100
+
+abs_age
+rel_age
+```
+
+# 3. Определение 90% доверительного интервала для переменной pedigree
+
+```{r}
+mean_pedigree <- mean(pima$pedigree)
+sd_pedigree <- sd(pima$pedigree)
+se_pedigree <- sd_pedigree / sqrt(length(pima$pedigree))
+
+alpha <- 0.1
+df <- length(pima$pedigree) - 1
+t <- qt(alpha / 2, df, lower.tail = F)
+
+pedigree_interval <- c(mean_pedigree - t * se_pedigree,
+                      mean_pedigree + t * se_pedigree)
+
+pedigree_interval
+```
+
+# 4.  Постройте график плотности вероятности для переменной glucose и отметьте на нем среднее значение. Для той же переменной постройте гистограмму. Постройте два ящика с усами для значений pos и neg соответственно переменной diabetes.
+
+
+# График плотности вероятности для переменной glucose.
+
+Постройте два ящика с усами для значений pos и neg соответственно переменной diabetes
+
+```{r}
+density_plot <- density(pima$glucose, na.rm = TRUE)
+plot(density_plot, main = "Плотнось вероятноси для уровня глюкозы", ylab = "Плотость вероятноси", xlab = "Уровень глюкозы")
+```
+# гистограмма для переменной glucose.
+
+
+```{r}
+hist(pima$glucose, main = "Гистограмма уровня глюкозы", xlab = "Уровень глюкозы", breaks = 40)
+```
+# Боксплот для переменной diabetes
+```{r}
+boxplot(glucose ~ diabetes, data = pima, main = "Боксплот для уровня глюкозы", xlab = "Наличие диабета", ylab = "Уровень глюкозы")
+```
+
+# 5. Постройте на одном графике две диаграммы рассеяния для наличия или отсутствия диабета. По оси X представьте значения обхвата трицепса, а по оси Y — массу тела. Выполните окрашивание, заливку и группирование по переменной diabetes.
+
+```{r}
+# Удаление строк, где обхват трицепса или масса тела равны нулю
+pima_clean <- subset(pima, triceps != 0 & mass != 0)
+# Построение графика
+ggplot(pima_clean, aes(x = triceps, y = mass, color = diabetes)) +
+  geom_point() + 
+  facet_grid(. ~ diabetes) + 
+  labs(x = "Обхват трицепса", y = "Масса тела", title = "Диаграмма рассеяния с группировкой по диабету") +
+  theme_minimal() 
+```
