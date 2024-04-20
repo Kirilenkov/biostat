@@ -1,0 +1,92 @@
+
+## 1. Рассчитайте выборку для исследования терапевтической эквивалентности для двухпериодного cross-over дизайна. 
+
+```{r}
+
+# Уровень значимост, мощность, ожидаемый drop-out rate
+alpha <- 0.05
+beta <- 0.2
+do_rate <- 0.1
+
+# z-значение для уровня значимости и мощности
+half_z_alpha <- abs(qnorm(1 - alpha/2))
+z_beta <- abs(qnorm(beta))
+
+# здесь имеенно дисперсия! Её не тебуется возводить в квадрат в формуле.
+variance <- 0.20
+epsilon <- 0.1
+delta <- 0.25
+
+# размер выборки для каждой группы (n1 = n2) 
+n <- ((half_z_alpha + z_beta)^2 * variance) / (2 * (delta - abs(epsilon))^2)
+
+# размер выборки для каждой группы с учетом drop-out rate
+do_n <- n / (1 - do_rate)
+
+one_group_sample_size <- ceiling(do_n)
+total_sample_size <- one_group_sample_size * 2
+cat('Размер выборки для n1=n2:', one_group_sample_size, '\n')
+cat('Общий размер выборки n:', total_sample_size, '\n')
+
+```
+
+## 2. Рассчитайте выборку для гипотезы non-inferiority для двухвыборочного параллельного дизайна. 
+
+```{r}
+# доля ответов для препарата сравнения
+p1 <- 0.85
+# доля ответов для тестового препарата
+p2 <- 0.65
+
+# клинически значимая разница
+delta <- -0.1
+
+# cоотношение групп
+k <- 1
+
+
+# z-значение для уровня значимости и мощности
+half_z_alpha <- abs(qnorm(1 - alpha/2))
+z_beta <- abs(qnorm(beta))
+
+
+# рассчитываем размер выборки для исследования
+n <- ((((half_z_alpha + z_beta)^2) * (p1 * (1 - p1) + p2 * (1 - p2))) / (p1 - p2 - delta)^2) * k
+
+
+# размер выборки для каждой группы с учетом drop-out rate
+do_n <- n / (1 - do_rate)
+
+one_group_sample_size <- ceiling(do_n)
+total_sample_size <- one_group_sample_size * 2
+cat('Размер выборки для n1=n2:', one_group_sample_size, '\n')
+cat('Общий размер выборки n:', total_sample_size, '\n')
+
+```
+
+## 3. Рассчитайте выборку для гипотезы equality
+
+```{r}
+# отношение рисков
+hr <- 2
+# доля пациентов, подверженных заболеванию
+d <- 0.8
+# соотношение групп
+p1 <- 0.5
+p2 <- 0.5
+
+
+
+# рассчитываем размер выборки для исследования
+n <- ((half_z_alpha + z_beta)^2) / ((log(hr)^2) * p1 * p2 * d)
+
+# размер выборки для каждой группы с учетом drop-out rate
+do_n <- n / (1 - do_rate)
+
+
+one_group_sample_size <- ceiling(do_n)
+total_sample_size <- one_group_sample_size * 2
+cat('Размер выборки для n1=n2:', one_group_sample_size, '\n')
+cat('Общий размер выборки n:', total_sample_size, '\n')
+```
+
